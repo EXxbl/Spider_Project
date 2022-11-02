@@ -11,8 +11,9 @@ class Youdao(object):
     # 读取js文件并且获取md5加密的值
     def get_md5(self,e):
         self.time_code = str(int(time.time()*10000))
+        # 创建node对象
         node = execjs.get()
-        ctx = node.compile(open('D:\Spider_Project\javascript\youdao.js',encoding='utf-8').read())
+        ctx = node.compile(open('../javascript/youdao.js',encoding='utf-8').read())
         funcname = 'get_md5("{}","{}")'.format(e,self.time_code)
         sign = ctx.eval(funcname)
         return sign
