@@ -74,5 +74,5 @@ class Youdao(object):
 
 if __name__ == "__main__":
     youdao = Youdao()
-    output = youdao.handel('public')
+    output = youdao.handel('连接')
     print(output)
