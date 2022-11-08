@@ -1,21 +1,17 @@
 import time
 import execjs
-import requests
+from common.spider import Spider
 
-class Youdao(object):
+class Youdao(Spider):
     def __init__(self):
-        self.session = requests.Session()
-        self.post = self.session.post
-        self.get = self.session.get
+        super().__init__()
 
     # 读取js文件并且获取md5加密的值
     def get_md5(self,e):
         self.time_code = str(int(time.time()*10000))
-        # 创建node对象
-        node = execjs.get()
-        ctx = node.compile(open('../javascript/youdao.js',encoding='utf-8').read())
+        # 获取js运行结果
         funcname = 'get_md5("{}","{}")'.format(e,self.time_code)
-        sign = ctx.eval(funcname)
+        sign = self.run_js('youdao.js',funcname)
         return sign
 
 
@@ -66,13 +62,17 @@ class Youdao(object):
 
     def handel(self,e):
         sign = self.get_md5(e)
-        output = self.get_translate(sign,e)
-        if output['errorCode'] == 0:
-            return output['smartResult']['entries']
+        world_translate = self.get_translate(sign,e)
+        if world_translate['errorCode'] == 0:
+            output = []
+            for world in world_translate['smartResult']['entries']:
+                if world:
+                    output.append(world.strip())
+            return output
         else:
             return '有道未搜索到该单词释义或未搜索到该语种'
 
 if __name__ == "__main__":
     youdao = Youdao()
-    output = youdao.handel('连接')
+    output = youdao.handel('car')
     print(output)
