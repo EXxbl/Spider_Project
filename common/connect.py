@@ -48,7 +48,7 @@ def trydecorator(fun):
 
 # 连接邮箱
 @trydecorator
-def email_conect(title,user_email='2757221248@qq.com',password='yyxwyuaetpjvdccd'):
+def qqemail_conect(title,user_email='2757221248@qq.com',password='yyxwyuaetpjvdccd'):
     # 选择服务器
     server = imaplib.IMAP4_SSL('imap.qq.com')
     try:
@@ -57,7 +57,7 @@ def email_conect(title,user_email='2757221248@qq.com',password='yyxwyuaetpjvdccd
         print(e)
         return None
     inbox = server.select("INBOX")
-    # 搜索匹配的邮件
+    # 搜索匹配的所有邮件，如果要搜索未读邮件则使用UNSEEN
     email_type, data = server.search(None, "ALL")
     # 邮件列表，使用空格分割得到邮件索引
     msglist = data[0].split()
@@ -78,3 +78,4 @@ def email_conect(title,user_email='2757221248@qq.com',password='yyxwyuaetpjvdccd
             else:
                 continue
     return None
+
