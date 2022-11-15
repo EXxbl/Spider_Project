@@ -52,39 +52,44 @@ class Fangtx(Spider):
 
     # 解析页面
     def parse_page_text(self,page_text):
-        tree = etree.HTML(page_text)
-        rooms = tree.xpath('//dl[@dataflag="bg"]')
-        messages = []
-        for room in rooms:
-            title = room.xpath('.//span[@class="tit_shop"]/text()')[0].strip()      # 标题
-            link = self.referer + room.xpath('.//h4/a/@href')[0][1:]                           # 链接
-            bed_room = room.xpath('.//p[@class="tel_shop"]/text()')[0].strip()      # 几房几厅
-            area = room.xpath('.//p[@class="tel_shop"]/text()')[1].strip()          # 面积
-            if room.xpath('.//p[@class="tel_shop"]/a[@class="link_rk"]/text()'):
-                floor = room.xpath('.//p[@class="tel_shop"]/a[@class="link_rk"]/text()')[0] + room.xpath('.//p[@class="tel_shop"]/text()')[3].strip()         # 楼层
-            else:
-                floor = room.xpath('.//p[@class="tel_shop"]/text()')[3].strip()
-            orientation = room.xpath('.//p[@class="tel_shop"]/text()')[4].strip()   # 朝向
-            build_time = room.xpath('.//p[@class="tel_shop"]/text()')[5].strip()    # 修建时间
-            adderss = room.xpath('.//p[@class="add_shop"]/span/text()')[0].strip()  # 地址
-            allprice = room.xpath('.//span[@class="red"]/b/text()')[0].strip()      # 总价
-            price = room.xpath('.//dd[@class="price_right"]/text()')[0].strip()     # 价格
-            people_name = room.xpath('.//span[@class="people_name"]/a/text()')[0].strip() # 联系人
+        try:
+            tree = etree.HTML(page_text)
+            rooms = tree.xpath('//dl[@dataflag="bg"]')
+            messages = []
+            for room in rooms:
+                title = room.xpath('.//span[@class="tit_shop"]/text()')[0].strip()      # 标题
+                link = self.referer + room.xpath('.//h4/a/@href')[0][1:]                           # 链接
+                bed_room = room.xpath('.//p[@class="tel_shop"]/text()')[0].strip()      # 几房几厅
+                area = room.xpath('.//p[@class="tel_shop"]/text()')[1].strip()          # 面积
+                if room.xpath('.//p[@class="tel_shop"]/a[@class="link_rk"]/text()'):
+                    floor = room.xpath('.//p[@class="tel_shop"]/a[@class="link_rk"]/text()')[0] + room.xpath('.//p[@class="tel_shop"]/text()')[3].strip()         # 楼层
+                else:
+                    floor = room.xpath('.//p[@class="tel_shop"]/text()')[3].strip()
+                orientation = room.xpath('.//p[@class="tel_shop"]/text()')[4].strip()   # 朝向
+                build_time = room.xpath('.//p[@class="tel_shop"]/text()')[5].strip()    # 修建时间
+                adderss = room.xpath('.//p[@class="add_shop"]/span/text()')[0].strip()  # 地址
+                allprice = room.xpath('.//span[@class="red"]/b/text()')[0].strip()      # 总价
+                price = room.xpath('.//dd[@class="price_right"]/text()')[0].strip()     # 价格
+                people_name = room.xpath('.//span[@class="people_name"]/a/text()')[0].strip() # 联系人
 
-            messages.append({
-                'title':title,
-                'link':link,
-                'bed_room':bed_room,
-                'area':area,
-                'floor':floor,
-                'orientation':orientation,
-                'build_time':build_time,
-                'adderss':adderss,
-                'allprice':allprice,
-                'price':price,
-                'people_name':people_name,
-            })
-        return messages
+                messages.append({
+                    'title':title,
+                    'link':link,
+                    'bed_room':bed_room,
+                    'area':area,
+                    'floor':floor,
+                    'orientation':orientation,
+                    'build_time':build_time,
+                    'adderss':adderss,
+                    'allprice':allprice,
+                    'price':price,
+                    'people_name':people_name,
+                })
+        except:
+            self.logger.info('')
+            messages = []
+        finally:
+            return messages
 
     # 主函数
     def handel(self):
