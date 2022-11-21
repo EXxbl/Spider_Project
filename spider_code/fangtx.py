@@ -1,10 +1,9 @@
-import traceback
 from lxml import etree
 from common.spider import Spider
 
 class Fangtx(Spider):
     def __init__(self):
-        super().__init__('ggzy')
+        super().__init__('fangtx')
         self.referer = 'https://passport.fang.com/'
         self.msg = '房天下'
 
