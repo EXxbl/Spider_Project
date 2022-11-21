@@ -114,9 +114,8 @@ class Wangyiyun(Spider):
         return message
 
 
-    def handel(self):
+    def handel(self,search_song):
         self.logger.info('网易云音乐开始抓取')
-        search_song = '孤勇者'
         # 先进行搜索
         message = self.search_song(search_song)
         if not message:
@@ -139,5 +138,6 @@ class Wangyiyun(Spider):
 
 if __name__ == '__main__':
     wangyiyun = Wangyiyun()
-    alldata = wangyiyun.handel()
+    search_song = '爱不会绝迹'
+    alldata = wangyiyun.handel(search_song)
     print(alldata)
