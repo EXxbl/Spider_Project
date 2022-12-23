@@ -77,7 +77,7 @@ class Jijian(Spider):
             'user-agent': self.user_agent,
             'x-requested-with': 'XMLHttpRequest',
         }
-        pointJson = self.run_js('jijian.js','''get_pointJson('{"x":{0},"y":5}','{1}')'''.format(str(310*distance/420),secretKey))
+        pointJson = self.run_js('jijian.js','''get_pointJson('{"x":{'''+str(310*distance/420)+'''},"y":5}',"'''+secretKey+'''")''')
         json_data = {
             'captchaType': 'blockPuzzle',
             'pointJson': pointJson,
