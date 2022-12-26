@@ -44,7 +44,6 @@ class Jijian(Spider):
             'referer': 'https://bz.zzzmh.cn/',
             'user-agent': self.user_agent,
         }
-
         json_data = {
             'size': 24,
             'current': page_code,
@@ -77,7 +76,7 @@ class Jijian(Spider):
             'user-agent': self.user_agent,
             'x-requested-with': 'XMLHttpRequest',
         }
-        pointJson = self.run_js('jijian.js','''get_pointJson('{"x":{'''+str(310*distance/420)+'''},"y":5}',"'''+secretKey+'''")''')
+        pointJson = self.run_js('jijian.js','''get_pointJson('{"x":'''+str(310*distance/420)+''',"y":5}',"'''+secretKey+'''")''')
         json_data = {
             'captchaType': 'blockPuzzle',
             'pointJson': pointJson,
@@ -85,6 +84,8 @@ class Jijian(Spider):
         }
         response = self.post('https://api.zzzmh.cn/captcha/check', headers=headers, json=json_data)
         if response.json()['repCode'] == "0000":
+            _0x4193a5 = token + '---' + '{"x":' + str(310 * distance / 420) + ',"y":5}'
+            captcha = self.run_js('jijian.js',"get_pointJson('"+ _0x4193a5 +"','"+secretKey+"')")
             return True
         return False
 
@@ -118,9 +119,16 @@ class Jijian(Spider):
             img_data = base64.b64decode(originalImageBase64)
             with open('../media/image/jijian/001.png', 'wb') as f:
                 f.write(img_data)
+            img = Image.open('../media/image/jijian/001.png')
+            new_img = img.resize((420, 210))
+            new_img.save('../media/image/jijian/001.png')
             img_data = base64.b64decode(jigsawImageBase64)
             with open('../media/image/jijian/002.png', 'wb') as f:
                 f.write(img_data)
+            img = Image.open('../media/image/jijian/002.png')
+            new_img = img.resize((63, 210))
+            new_img.save('../media/image/jijian/002.png')
+            # 进行滑动验证码的拼接
             distance = get_distance(bg='../media/image/jijian/001.png',tp='../media/image/jijian/002.png')
             check_bool = self.check(distance,secretKey,token)
             if not check_bool:
