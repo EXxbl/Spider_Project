@@ -1,5 +1,6 @@
 import base64
 import os
+import random
 import time
 import tkinter
 import traceback
@@ -15,6 +16,14 @@ class Jijian(Spider):
         self.page_code = 0
         self.referer = ''
         self.msg = '极简壁纸'
+        self.captcha = ''
+        self.chuck = ''
+        self.clientUid = 'slider-'
+        for y in [8, 4, 4, 4, 12]:
+            for i in range(y):
+                self.clientUid += random.choice('0123456789abcdef')
+            if y != 12:
+                self.clientUid += '-'
 
     # 保存图片
     def save_image(self,img_data,img_name):
@@ -44,6 +53,11 @@ class Jijian(Spider):
             'referer': 'https://bz.zzzmh.cn/',
             'user-agent': self.user_agent,
         }
+        if self.captcha:
+            headers['captcha'] = self.captcha
+            self.captcha = ''
+        if self.chuck:
+            headers['chuck'] = self.chuck
         json_data = {
             'size': 24,
             'current': page_code,
@@ -56,12 +70,21 @@ class Jijian(Spider):
         }
 
         response = self.post('https://api.zzzmh.cn/bz/v3/getData', headers=headers, json=json_data)
-        if response.json()['msg'] == 'success':
+        if response.json()['code'] == 0:
+            if 'chuck' in response.json():
+                self.chuck = response.json()['chuck']
             return response.json()['result']
+        elif response.json()['code'] in [700,701,702]:
+            check_bool = self.request_get()
+            if check_bool:
+                return self.request_getData(page_code)
+            else:
+                return None
         else:
             self.logger.info('getData返回出错 msg:{}'.format(response.json()['msg']))
             self.msg = 'getData返回出错'
             return None
+
     # 进行滑块验证请求发送
     def check(self,distance,secretKey,token):
         headers = {
@@ -85,7 +108,7 @@ class Jijian(Spider):
         response = self.post('https://api.zzzmh.cn/captcha/check', headers=headers, json=json_data)
         if response.json()['repCode'] == "0000":
             _0x4193a5 = token + '---' + '{"x":' + str(310 * distance / 420) + ',"y":5}'
-            captcha = self.run_js('jijian.js',"get_pointJson('"+ _0x4193a5 +"','"+secretKey+"')")
+            self.captcha = self.run_js('jijian.js',"get_pointJson('"+ _0x4193a5 +"','"+secretKey+"')")
             return True
         return False
 
@@ -109,7 +132,8 @@ class Jijian(Spider):
             'clientUid': None,
             'ts': int(time.time()*1000),
         }
-
+        if self.page_code > 2:
+            json_data['clientUid'] = self.clientUid
         response = self.post('https://api.zzzmh.cn/captcha/get', headers=headers, json=json_data)
         if response:
             originalImageBase64 = response.json()['repData']['originalImageBase64']
@@ -130,10 +154,16 @@ class Jijian(Spider):
             new_img.save('../media/image/jijian/002.png')
             # 进行滑动验证码的拼接
             distance = get_distance(bg='../media/image/jijian/001.png',tp='../media/image/jijian/002.png')
+
             check_bool = self.check(distance,secretKey,token)
             if not check_bool:
                 self.logger.info('滑动验证码匹配失败')
                 self.msg = '滑动验证码匹配失败'
+                return None
+            # 获取到了距离以后就把滑块图片删了
+            os.remove('../media/image/jijian/001.png')
+            os.remove('../media/image/jijian/002.png')
+            return check_bool
         else:
             self.logger.info('请求滑动验证码滑块图失败')
             self.msg = '请求滑动验证码失败'
@@ -152,6 +182,8 @@ class Jijian(Spider):
                 'referer': 'https://bz.zzzmh.cn/',
                 'user-agent': self.user_agent,
             }
+            if self.chuck:
+                headers['chuck'] = self.chuck
             params = {
                 'auth_key': auth_key[1],
             }
@@ -167,8 +199,6 @@ class Jijian(Spider):
         for self.page_code in range(1,200):
             cont = tkinter.messagebox.askokcancel('提示','马上要抓取极简壁纸第{}页, 是否继续?'.format(self.page_code))
             if cont:
-                if self.page_code > 1:
-                    self.request_get()
                 result = self.request_getData(self.page_code)
                 self.get_img(result)
                 if not result:
